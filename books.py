@@ -1,9 +1,11 @@
-from crypt import methods
+import os
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import current_user, login_required
 from app import db
-from models import Book, Review, User
+from models import Book, BookGenre, Review, User, Genre, Image
 from tools import BooksFilter, ImageSaver, ReviewsFilter
+from auth import check_rights
+import markdown
 
 bp = Blueprint('books', __name__, url_prefix='/books')
 
@@ -13,7 +15,7 @@ COMMENT_PAGE = 5
 
 PER_PAGE_COMMENTS = 10
 
-BOOK_PARAMS = ['author', 'name', 'publisher', 'short_desc', 'full_desc', 'year', 'vol_pages']
+BOOK_PARAMS = ['author', 'name', 'publisher', 'short_desc', 'year', 'vol_pages']
 
 COMMENT_PARAMS = ['rating', 'text', 'book_id', 'user_id']
 
@@ -27,12 +29,147 @@ def comment_params():
 
 def search_params():
     return {
-        'name': request.args.get('name'),
-        'genre_ids': request.args.getlist('genre_ids')
+        'name': request.args.get('name')
     }
 
-def search_params_comm(book_id):
+def search_params_comm(book_id, req_form=None):
     return {
         'name': request.args.get('name'),
-        'book_id': book_id
+        'book_id': book_id,
+        'sort': req_form
     }
+
+
+@bp.route('/new')
+@check_rights('create')
+@login_required
+def new():
+    genres = Genre.query.all()
+    return render_template('books/new.html', genres=genres, genres_select=[], book={})
+
+
+@bp.route('/create', methods=['POST'])
+@check_rights('create')
+@login_required
+def create():
+
+    book = Book(**params())
+    db.session.add(book)
+    db.session.commit()
+
+    # book = Book.query.filter_by(id)
+
+    f = request.files.get('background_img')
+    if f and f.filename:
+        img = ImageSaver(f).save(book.id)
+    
+    genres_arr = request.form.getlist('genre')
+    for genres in genres_arr:
+        book_genre = BookGenre()
+        book_genre.book_id = book.id
+        book_genre.genre_id = genres
+        db.session.add(book_genre)
+
+    db.session.commit()
+
+    flash(f'Книга {book.name} была успешно добавлена!', 'success')
+    return redirect(url_for('index'))
+
+@bp.route('/<int:book_id>')
+def show(book_id):
+    book = Book.query.get(book_id)
+    book.short_desc = markdown.markdown(book.short_desc)
+    reviews = Review.query.filter_by(book_id=book_id).limit(COMMENT_PAGE)
+    user_review = None
+    if current_user.is_authenticated is True:
+        user_review = Review.query.filter_by(book_id=book_id, user_id=current_user.id).first()
+    users = User.query.all()
+    
+    genres_quer = BookGenre.query.filter_by(book_id=book_id).all()
+    genres = []
+    for genre in genres_quer:
+        genres.append(genre.genre.name)
+    genres = ', '.join(genres)
+
+    img = Image.query.filter_by(book_id=book_id).first()
+    img = img.url
+
+    return render_template('books/show.html', book=book, review=reviews, users=users, user_review=user_review, genres=genres, image=img)
+
+
+@bp.route('/<int:book_id>/edit')
+@login_required
+@check_rights('update')
+def edit(book_id):
+    book = Book.query.filter_by(id=book_id).first()  
+    genres = Genre.query.all()
+    genres_quer = BookGenre.query.filter_by(book_id=book_id).all()
+    genres_select = []
+    for genre in genres_quer:
+        genres_select.append(genre.genre.id)
+    return render_template('books/edit.html', genres=genres, genres_select=genres_select, book=book)
+
+
+@bp.route('/<int:book_id>/update', methods=['POST'])
+@login_required
+@check_rights('update')
+def update(book_id):
+    book = Book.query.filter_by(id=book_id).first()
+    form_dict = params()
+    book.name = form_dict['name']
+    book.author = form_dict['author']
+    book.publisher = form_dict['publisher']
+    book.short_desc = form_dict['short_desc']
+    book.year = form_dict['year']
+    db.session.commit()
+    return redirect(url_for('index'))
+
+
+@login_required
+@bp.route('/<int:book_id>/delete', methods=['POST'])
+@check_rights('delete')
+def delete(book_id):
+    book = Book.query.filter_by(id=book_id).first()
+    book_name = book.name
+    img = Image.query.filter_by(book_id=book_id).first()
+    img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'images') + '\\' + img.storage_filename
+    db.session.delete(book)
+    db.session.commit()
+    os.remove(img_path)
+    flash(f'Книга {book_name} была успешно удалена!', 'success')
+    return redirect(url_for('index'))
+
+
+
+@bp.route('/<int:book_id>', methods=['POST'])
+@login_required
+def send_comment(book_id):
+    reviews = Review(**comment_params())
+    books = Book.query.filter_by(id=book_id).first()
+    books.rating_num += 1
+    books.rating_sum += int(reviews.rating)
+    db.session.add(reviews)
+    db.session.commit()
+    flash('Комментарий был успешно добавлен!', 'success')
+    return redirect(url_for('books.show', book_id=books.id))
+
+
+@bp.route('/<int:book_id>/reviews')
+def reviews(book_id):
+    page = request.args.get('page', 1, type=int)
+    sort = request.args.get('sort')
+    reviews = sort_func(book_id, sort)
+    books = Book.query.filter_by(id=book_id).first()
+    pagination = reviews.paginate(page, PER_PAGE_COMMENTS)
+    reviews = pagination.items
+    return render_template('books/reviews.html', reviews=reviews, books=books, req_form=sort, pagination=pagination, search_params=search_params_comm(book_id, sort))
+
+def sort_func(book_id, sort):
+    reviews = ReviewsFilter(book_id).perform_date_desc()
+    if sort == 'old':
+        reviews = ReviewsFilter(book_id).perform_date_asc()
+    elif sort == 'good':
+        reviews = ReviewsFilter(book_id).perform_rating_desc()
+    elif sort == 'bad':
+        reviews = ReviewsFilter(book_id).perform_rating_asc()
+    return reviews

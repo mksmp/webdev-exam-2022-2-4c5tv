@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% from 'feedback.html' import render_feedback_form, render_my_feedback, render_rows_feedback %}
+
+{% block content %}
+<div class="title-area position-relative" style="background-image: url({{ image }});">
+    <div class="h-100 w-100 py-5 d-flex text-center position-absolute" style="background-color: rgba(0, 0, 0, 0.65);">
+        <div class="m-auto">
+            <h1 class="title mb-3 font-weight-bold">{{ book.name }}</h1>
+            <p class="mb-3 mx-auto">
+                {{ genres }} | <span>★</span> <span>{{ "%.2f" | format(book.rating) }}</span>
+            </p>
+            <div class="container">
+                <p class="description w-75 mb-5 mx-auto">
+                    {{ book.author }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <section class="about mb-5">
+        <h2 class="mb-3 text-center text-uppercase font-weight-bold">О книге</h2>
+        <p>{{ book.short_desc | safe }}</p>
+        
+    </section>
+
+    {% if current_user.is_authenticated %}
+        {% if user_review %}
+            <div class="mb-5">
+                {{ render_my_feedback(user_review, current_user) }}
+            </div>
+        {% else %}
+            <div class="mb-5">
+                {{ render_feedback_form(book, current_user) }}
+            </div>
+        {% endif %}
+    {% endif %}
+   
+    <!-- ОТЗЫВЫ -->
+
+    <h2 class="mb-3 text-center text-uppercase font-weight-bold">Отзывы</h2>
+        <div class="container d-flex w-50 justify-content-center flex-column">
+            {{ render_rows_feedback(review) }}
+        </div>
+    <div class="text-center">
+        <a href="{{ url_for('books.reviews', book_id=book.id) }}" class="mb-5 text-center btn btn-dark">Все отзывы по данному курсу</a>
+    </div>
+
+</div>
+
+{% endblock %}

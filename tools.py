@@ -7,33 +7,25 @@ from app import db, app
 
 
 class BooksFilter:
-    def __init__(self, name, genre_ids):
+    def __init__(self, name):
         self.name = name
-        self.genre_ids = genre_ids
         self.query_name = Book.query
-        self.query_genre = BookGenre.query
 
     def perform(self):
         self.__filter_by_name()
-        self.__filter_by_genre_ids()
-        return self.query_name.order_by(Book.created_at.desc())
+        return self.query_name.order_by(Book.name.desc())
 
     def __filter_by_name(self):
         if self.name:
             self.query_name = self.query_name.filter(
                 Book.name.ilike('%' + self.name + '%'))
 
-    def __filter_by_genre_ids(self):
-        if self.genre_ids:
-            self.query_genre = self.query_genre.filter(
-                BookGenre.genre_id.in_(self.genre_ids))
-
 
 class ImageSaver:
     def __init__(self, file):
         self.file = file
 
-    def save(self):
+    def save(self, book_id):
         self.img = self.__find_by_md5_hash()
         if self.img is not None:
             return self.img
@@ -41,6 +33,7 @@ class ImageSaver:
         self.img = Image(id=str(uuid.uuid4()), file_name=file_name,
                          mime_type=self.file.mimetype, md5_hash=self.md5_hash)
         self.file.save(os.path.join(app.config['UPLOAD_FOLDER'], self.img.storage_filename))
+        self.img.book_id = book_id
         db.session.add(self.img)
         db.session.commit()
         return self.img

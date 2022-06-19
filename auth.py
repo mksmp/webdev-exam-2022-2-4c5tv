@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
-from flask_login import LoginManager, login_user, logout_user, login_required
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from users_policy import UsersPolicy
 from models import User
+import functools
+
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -12,6 +15,30 @@ def init_login_manager(app):
     login_manager.login_message_category = 'warning'
     login_manager.user_loader(load_user)
     login_manager.init_app(app)
+
+
+# class CurUser(UserMixin):
+#     def __init__(self, user_id, login, role_id):
+#         super().__init__()
+#         self.id = user_id
+#         self.login = login
+#         self.role_id = role_id
+
+#     @property
+#     def is_admin(self):
+#         return bp.config.get('ADMIN_ROLE_ID') == self.role_id
+
+#     @property
+#     def is_moder(self):
+#         return bp.config.get('MODER_ROLE_ID') == self.role_id
+
+#     def can(self, action, record=None):
+#         users_policy = UsersPolicy(record=record)
+#         method = getattr(users_policy, action, None)
+#         if method is not None:
+#             return method()
+#         return False
+
 
 def load_user(user_id):
     user = User.query.get(user_id)
@@ -37,3 +64,14 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+def check_rights(action):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if not current_user.can(action):
+                flash('У вас недостаточно прав для доступа к данной странице.', 'danger')
+                return redirect(url_for('index'))     
+            return func(*args, **kwargs)
+        return wrapper           
+    return decorator

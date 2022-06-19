@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, send_file, abort, send_from_directory
+from flask import Flask, render_template, send_file, abort, send_from_directory, Blueprint, render_template, request, flash, redirect, url_for
 from sqlalchemy import MetaData
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -31,15 +31,32 @@ app.register_blueprint(books_bp)
 
 init_login_manager(app)
 
-from models import User, Image
+from models import BookGenre, User, Image
+from tools import BooksFilter, ImageSaver, ReviewsFilter
+from books import PER_PAGE, search_params
 
 @app.route('/')
 def index():
-    # categories = Category.query.all() # Добавить жанры вместо категорий
-    return render_template(
-        'index.html',
-        categories=categories,
-    )
+    page = request.args.get('page', 1, type=int)
+    books = BooksFilter(**search_params()).perform()
+    pagination = books.paginate(page, PER_PAGE)
+    books = pagination.items
+    imgs_arr = []
+    genres_arr = []
+    for book in books:
+        img = Image.query.filter_by(book_id=book.id).first()
+        imgs_arr.append(img.url)
+        genres_quer = BookGenre.query.filter_by(book_id=book.id).all()
+        genres = []
+        for genre in genres_quer:
+            genres.append(genre.genre.name)
+        genres_str = ', '.join(genres)
+        print(book.id, genres_str)
+        genres_arr.append(genres_str)
+        
+
+    return render_template('books/index.html', books=books, pagination=pagination, search_params=search_params(), imgs=imgs_arr, genres=genres_arr)
+
 
 
 @app.route('/media/images/<image_id>')
