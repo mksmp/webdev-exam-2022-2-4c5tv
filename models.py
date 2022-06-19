@@ -144,7 +144,3 @@ class BookGenre(db.Model):
 
     def __repr__(self):
         return '<GenresOfBook %r>' % self.id
-
-    @property
-    def save_book_genre(self):
-        pass

@@ -14,6 +14,3 @@ class UsersPolicy:
     def update(self):
         return current_user.is_admin or current_user.is_moder
     
-    # def show(self):
-    #     is_showing_user = current_user.id == self.record.id
-    #     return current_user.is_admin or is_showing_user

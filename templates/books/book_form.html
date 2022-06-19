@@ -18,8 +18,6 @@
                     <label for="author">Автор</label>
                     <input type="text" class="form-control" placeholder="Введите ФИО автора" name="author" id="author" value="{{ book.author }}">
                 </div>
-            </div>
-            <div class="col-md-6 d-flex flex-column">
                 <div class="mb-3">
                     <label for="publisher">Издательство</label>
                     <input type="text" class="form-control" placeholder="Введите издательство" name="publisher" id="publisher" value="{{ book.publisher }}">
@@ -28,6 +26,8 @@
                     <label for="year">Год выпуска</label>
                     <input type="text" class="form-control" placeholder="Введите год в формате YYYY" name="year" id="year" value="{{ book.year }}">
                 </div>
+            </div>
+            <div class="col-md-6 d-flex flex-column">
                 <div class="mb-3 d-flex flex-column flex-grow-1">
                     <label for="short_description">Краткое описание</label>
                     <textarea class="form-control flex-grow-1" name="short_desc" id="short_description" cols="30" rows="5">{{ book.short_desc | safe }}</textarea>

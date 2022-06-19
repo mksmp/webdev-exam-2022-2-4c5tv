@@ -5,7 +5,7 @@ from app import db
 from models import Book, BookGenre, Review, User, Genre, Image
 from tools import BooksFilter, ImageSaver, ReviewsFilter
 from auth import check_rights
-import markdown
+# import markdown
 
 bp = Blueprint('books', __name__, url_prefix='/books')
 

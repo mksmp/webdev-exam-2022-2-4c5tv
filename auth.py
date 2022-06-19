@@ -69,7 +69,10 @@ def check_rights(action):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            if not current_user.can(action):
+            if current_user.is_anonymous:
+                flash('Авторизуйтесь для просмотра данной страницы!', 'danger')
+                return redirect(url_for('index'))     
+            elif not current_user.can(action):
                 flash('У вас недостаточно прав для доступа к данной странице.', 'danger')
                 return redirect(url_for('index'))     
             return func(*args, **kwargs)

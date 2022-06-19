@@ -36,6 +36,16 @@
         </nav>
     </header>
         
+    <div class="alerts-area">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, msg in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show m-0 rounded-0" role="alert">
+                    {{ msg }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endwith %}
+    </div>
 
     <main class="main flex-grow-1">
        {% block content %}
