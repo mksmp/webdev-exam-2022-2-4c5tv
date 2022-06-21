@@ -27,6 +27,13 @@
                 {% if current_user.is_authenticated %}
                     <div class="d-flex flex-row align-items-center">
                         <h6 class="text-white me-3 mb-0">{{current_user.full_name}}</h6>
+                        {% if current_user.can('check_collections') %}
+                            {% if endpoint == 'collections' %}
+                                <a class="btn btn-outline-light me-3" href="{{ url_for('index') }}">Вернуться ко всем книгам</a>
+                            {% else %}
+                                <a class="btn btn-outline-light me-3" href="{{ url_for('books.collections') }}">Мои подборки</a>
+                            {% endif %}
+                        {% endif %}
                         <a class="btn btn-outline-light" href="{{ url_for('auth.logout') }}">Выйти</a>
                     </div>
                 {% else %}

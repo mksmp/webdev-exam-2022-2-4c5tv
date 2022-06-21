@@ -2,10 +2,10 @@ import os
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import current_user, login_required
 from app import db
-from models import Book, BookGenre, Review, User, Genre, Image
+from models import Book, BookGenre, Review, User, Genre, Image, Collection, BookCollection
 from tools import BooksFilter, ImageSaver, ReviewsFilter
 from auth import check_rights
-# import markdown
+import markdown
 
 bp = Blueprint('books', __name__, url_prefix='/books')
 
@@ -19,10 +19,10 @@ BOOK_PARAMS = ['author', 'name', 'publisher', 'short_desc', 'year', 'vol_pages']
 
 COMMENT_PARAMS = ['rating', 'text', 'book_id', 'user_id']
 
+COLLECTION_PARAMS = ['name','user_id']
 
 def params():
     return { p: request.form.get(p) for p in BOOK_PARAMS }
-
 
 def comment_params():
     return { p: request.form.get(p) for p in COMMENT_PARAMS }
@@ -39,13 +39,15 @@ def search_params_comm(book_id, req_form=None):
         'sort': req_form
     }
 
+def selection_params():
+    return { p: request.form.get(p) for p in COLLECTION_PARAMS }
 
 @bp.route('/new')
 @check_rights('create')
 @login_required
 def new():
     genres = Genre.query.all()
-    return render_template('books/new.html', genres=genres, genres_select=[], book={})
+    return render_template('books/new.html', genres=genres)
 
 
 @bp.route('/create', methods=['POST'])
@@ -94,7 +96,10 @@ def show(book_id):
     img = Image.query.filter_by(book_id=book_id).first()
     img = img.url
 
-    return render_template('books/show.html', book=book, review=reviews, users=users, user_review=user_review, genres=genres, image=img)
+    collections = Collection.query.filter_by(user_id=current_user.id).all()
+
+
+    return render_template('books/show.html', book=book, review=reviews, users=users, user_review=user_review, genres=genres, image=img, collections=collections)
 
 
 @bp.route('/<int:book_id>/edit')
@@ -107,6 +112,7 @@ def edit(book_id):
     genres_select = []
     for genre in genres_quer:
         genres_select.append(genre.genre.id)
+
     return render_template('books/edit.html', genres=genres, genres_select=genres_select, book=book)
 
 
@@ -114,13 +120,25 @@ def edit(book_id):
 @login_required
 @check_rights('update')
 def update(book_id):
-    book = Book.query.filter_by(id=book_id).first()
+    book = Book.query.filter_by(id=book_id).first() # апдейт книги
     form_dict = params()
     book.name = form_dict['name']
     book.author = form_dict['author']
     book.publisher = form_dict['publisher']
     book.short_desc = form_dict['short_desc']
     book.year = form_dict['year']
+    
+    genres_old = BookGenre.query.filter_by(book_id=book_id).all() # удаление старых жанров для данной книги
+    for gnr in genres_old:
+        db.session.delete(gnr)
+
+    genres_arr = request.form.getlist('genre') # добавление новых жанров для данной книги
+    for genres in genres_arr:
+        book_genre = BookGenre()
+        book_genre.book_id = book.id
+        book_genre.genre_id = genres
+        db.session.add(book_genre)
+
     db.session.commit()
     return redirect(url_for('index'))
 
@@ -158,18 +176,45 @@ def send_comment(book_id):
 def reviews(book_id):
     page = request.args.get('page', 1, type=int)
     sort = request.args.get('sort')
-    reviews = sort_func(book_id, sort)
+    reviews = ReviewsFilter(book_id).sort_reviews(sort)
     books = Book.query.filter_by(id=book_id).first()
     pagination = reviews.paginate(page, PER_PAGE_COMMENTS)
     reviews = pagination.items
     return render_template('books/reviews.html', reviews=reviews, books=books, req_form=sort, pagination=pagination, search_params=search_params_comm(book_id, sort))
 
-def sort_func(book_id, sort):
-    reviews = ReviewsFilter(book_id).perform_date_desc()
-    if sort == 'old':
-        reviews = ReviewsFilter(book_id).perform_date_asc()
-    elif sort == 'good':
-        reviews = ReviewsFilter(book_id).perform_rating_desc()
-    elif sort == 'bad':
-        reviews = ReviewsFilter(book_id).perform_rating_asc()
-    return reviews
+@bp.route('/collections')
+@login_required
+@check_rights('check_collections')
+def collections():
+    collections = Collection.query.filter_by(user_id=current_user.id).all()
+    return render_template('books/collections.html', endpoint = 'collections', collections=collections)
+
+@bp.route('/collections/<int:user_id>', methods=['POST'])
+@login_required
+@check_rights('check_collections')
+def create_collection(user_id):
+    collection = Collection(**selection_params())
+    collection.user_id = user_id
+    db.session.add(collection)
+    db.session.commit()
+    flash(f'Подборка {collection.name} была успешно добавлена!', 'success')
+    return redirect(url_for('books.collections'))
+
+@bp.route('/add_to_collection/<int:book_id>', methods=['POST'])
+@login_required
+@check_rights('check_collections')
+def add_to_collection(book_id):
+    collection_id = request.form.get('collection')
+    
+    # тут прописать проверку
+    # if 
+    #     flash(f'Эта книга уже есть в выбранной подборке!', 'danger')
+    #     return redirect(url_for('books.show', book_id=book_id))
+    
+    add_book = BookCollection()
+    add_book.book_id = book_id
+    add_book.collection_id = collection_id
+    db.session.add(add_book)
+    db.session.commit()
+    flash(f'Книга была успешно добавлена в подборку!', 'success')
+    return redirect(url_for('books.show', book_id=book_id))

@@ -48,6 +48,10 @@ class User(db.Model, UserMixin):
     @property
     def is_moder(self):
         return app.config.get('MODER_ROLE_ID') == self.role_id
+    
+    @property
+    def is_user(self):
+        return app.config.get('USER_ROLE_ID') == self.role_id
 
     def can(self, action):
         users_policy = UsersPolicy()
@@ -144,3 +148,32 @@ class BookGenre(db.Model):
 
     def __repr__(self):
         return '<GenresOfBook %r>' % self.id
+
+    @property
+    def save_book_genre(self):
+        pass
+
+class Collection(db.Model):
+    __tablename__ = 'collections'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'))
+
+    user = db.relationship('User')
+
+    def __repr__(self):
+        return '<Collection %r>' % self.name
+
+class BookCollection(db.Model):
+    __tablename__ = 'book_collection'
+
+    id = db.Column(db.Integer, primary_key=True)
+    collection_id = db.Column(db.Integer, db.ForeignKey('collections.id', ondelete='CASCADE'))
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id', ondelete='CASCADE'))
+
+    selection = db.relationship('Collection')
+    book = db.relationship('Book')
+
+    def __repr__(self):
+        return '<BookCollection %r>' % self.id

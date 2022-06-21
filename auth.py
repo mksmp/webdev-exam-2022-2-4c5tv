@@ -17,29 +17,6 @@ def init_login_manager(app):
     login_manager.init_app(app)
 
 
-# class CurUser(UserMixin):
-#     def __init__(self, user_id, login, role_id):
-#         super().__init__()
-#         self.id = user_id
-#         self.login = login
-#         self.role_id = role_id
-
-#     @property
-#     def is_admin(self):
-#         return bp.config.get('ADMIN_ROLE_ID') == self.role_id
-
-#     @property
-#     def is_moder(self):
-#         return bp.config.get('MODER_ROLE_ID') == self.role_id
-
-#     def can(self, action, record=None):
-#         users_policy = UsersPolicy(record=record)
-#         method = getattr(users_policy, action, None)
-#         if method is not None:
-#             return method()
-#         return False
-
-
 def load_user(user_id):
     user = User.query.get(user_id)
     return user

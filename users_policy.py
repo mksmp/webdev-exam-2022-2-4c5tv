@@ -14,3 +14,5 @@ class UsersPolicy:
     def update(self):
         return current_user.is_admin or current_user.is_moder
     
+    def check_collections(self):
+        return current_user.is_user

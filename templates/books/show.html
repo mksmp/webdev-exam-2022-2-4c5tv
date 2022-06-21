@@ -22,31 +22,62 @@
     <section class="about mb-5">
         <h2 class="mb-3 text-center text-uppercase font-weight-bold">О книге</h2>
         <p>{{ book.short_desc | safe }}</p>
-        
+        <button data-url="{{ url_for('books.add_to_collection', book_id=book.id) }}"
+            class="mb-5 text-center btn btn-dark" data-bs-toggle="modal"
+            data-bs-target="#add-book-to-collection">Добавить эту книгу в свою подборку</button>
     </section>
 
     {% if current_user.is_authenticated %}
-        {% if user_review %}
-            <div class="mb-5">
-                {{ render_my_feedback(user_review, current_user) }}
-            </div>
-        {% else %}
-            <div class="mb-5">
-                {{ render_feedback_form(book, current_user) }}
-            </div>
-        {% endif %}
+    {% if user_review %}
+    <div class="mb-5">
+        {{ render_my_feedback(user_review, current_user) }}
+    </div>
+    {% else %}
+    <div class="mb-5">
+        {{ render_feedback_form(book, current_user) }}
+    </div>
     {% endif %}
-   
+    {% endif %}
+
     <!-- ОТЗЫВЫ -->
 
     <h2 class="mb-3 text-center text-uppercase font-weight-bold">Отзывы</h2>
-        <div class="container d-flex w-50 justify-content-center flex-column">
-            {{ render_rows_feedback(review) }}
-        </div>
+    <div class="container d-flex w-50 justify-content-center flex-column">
+        {{ render_rows_feedback(review) }}
+    </div>
     <div class="text-center">
-        <a href="{{ url_for('books.reviews', book_id=book.id) }}" class="mb-5 text-center btn btn-dark">Все отзывы по данному курсу</a>
+        <a href="{{ url_for('books.reviews', book_id=book.id) }}" class="mb-5 text-center btn btn-dark">Все отзывы по
+            данному курсу</a>
     </div>
 
+    <div class="modal fade" id="add-book-to-collection" tabindex="-1" aria-labelledby="add-to-collection-modal"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="add-to-collection-modal">Добавить в подборку</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ url_for('books.add_to_collection', book_id=book.id) }}"
+                        enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="collection">Выберите свою подборку, в которую хотите добавить книгу:</label>
+                            <select class="form-select" name="collection" id="collection">
+                                {% for collection in collections %}
+                                <option value="{{ collection.id }}">{{ collection.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <input id="add-book-to-collection-btn" type="submit" class="d-none">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <label class="btn btn-success" for="add-book-to-collection-btn">Добавить</label>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
 {% endblock %}

@@ -48,14 +48,24 @@ class ReviewsFilter:
     def __init__(self, book_id):
         self.query = Review.query.filter_by(book_id=book_id)
 
-    def perform_date_desc(self):
+    def sort_reviews(self, sort):
+        reviews = self.__perform_date_desc()
+        if sort == 'old':
+            reviews = self.__perform_date_asc()
+        elif sort == 'good':
+            reviews = self.__perform_rating_desc()
+        elif sort == 'bad':
+            reviews = self.__perform_rating_asc()
+        return reviews
+
+    def __perform_date_desc(self):
         return self.query.order_by(Review.created_at.desc())
 
-    def perform_date_asc(self):
+    def __perform_date_asc(self):
         return self.query.order_by(Review.created_at.asc())
 
-    def perform_rating_desc(self):
+    def __perform_rating_desc(self):
         return self.query.order_by(Review.rating.desc())
 
-    def perform_rating_asc(self):
+    def __perform_rating_asc(self):
         return self.query.order_by(Review.rating.asc())
