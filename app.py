@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, send_file, abort, send_from_directory, Blueprint, render_template, request, flash, redirect, url_for
+from flask import Flask, render_template, abort, send_from_directory, render_template, request
 from sqlalchemy import MetaData
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -31,8 +31,8 @@ app.register_blueprint(books_bp)
 
 init_login_manager(app)
 
-from models import BookGenre, User, Image
-from tools import BooksFilter, ImageSaver, ReviewsFilter
+from models import BookGenre, Image
+from tools import BooksFilter
 from books import PER_PAGE, search_params
 
 @app.route('/')
@@ -51,7 +51,6 @@ def index():
         for genre in genres_quer:
             genres.append(genre.genre.name)
         genres_str = ', '.join(genres)
-        print(book.id, genres_str)
         genres_arr.append(genres_str)
         
 

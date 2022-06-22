@@ -1,5 +1,4 @@
 from flask_login import current_user
-from config import MODER_ROLE_ID
 
 class UsersPolicy:
     def __init__(self):

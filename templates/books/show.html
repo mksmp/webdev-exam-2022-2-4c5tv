@@ -22,9 +22,11 @@
     <section class="about mb-5">
         <h2 class="mb-3 text-center text-uppercase font-weight-bold">О книге</h2>
         <p>{{ book.short_desc | safe }}</p>
-        <button data-url="{{ url_for('books.add_to_collection', book_id=book.id) }}"
-            class="mb-5 text-center btn btn-dark" data-bs-toggle="modal"
-            data-bs-target="#add-book-to-collection">Добавить эту книгу в свою подборку</button>
+        {% if collections != None %}
+            <button data-url="{{ url_for('books.add_to_collection', book_id=book.id) }}"
+                class="mb-5 text-center btn btn-dark" data-bs-toggle="modal"        
+                data-bs-target="#add-book-to-collection">Добавить эту книгу в свою подборку</button>
+        {% endif %}
     </section>
 
     {% if current_user.is_authenticated %}
@@ -49,7 +51,7 @@
         <a href="{{ url_for('books.reviews', book_id=book.id) }}" class="mb-5 text-center btn btn-dark">Все отзывы по
             данному курсу</a>
     </div>
-
+    {% if collections != None %}
     <div class="modal fade" id="add-book-to-collection" tabindex="-1" aria-labelledby="add-to-collection-modal"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -79,5 +81,6 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 {% endblock %}

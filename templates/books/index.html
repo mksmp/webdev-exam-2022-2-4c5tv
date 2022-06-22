@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% from 'pagination.html' import render_pagination %}
+{% from 'books/clickable_book_card.html' import clickable_book_card %}
 
 {% block content %}
 <div class="container">
@@ -8,18 +9,7 @@
         <div class="row">
             {% for book in books %}
             <div class="card col-md-2 me-3 mb-3" style="width: 18rem;">
-                <a href="{{ url_for('books.show', book_id=book.id) }}" style="text-decoration:none">
-                    <img src="{{ imgs[loop.index0] }}" class="card-img-top" alt="...">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ book.name }}</h5>
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><b>Жанры:{{ genres[loop.index0] }}</b></li>
-                        <li class="list-group-item"><b>Год издания:</b> {{ book.year }}</li>
-                        <li class="list-group-item"><b>Рейтинг:</b> {{ book.rating }}</li>
-                        <li class="list-group-item"><b>Количество рецензий:</b> {{ book.rating_num }}</li>
-                    </ul>
-                </a>
+                {{ clickable_book_card(book, imgs, genres, loop) }}
                 <div class="btn-group align-items-center container-fluid" role="group" style="width:99%;">
                     {% if current_user.is_authenticated %}
                         {% if current_user.can('update') %}
