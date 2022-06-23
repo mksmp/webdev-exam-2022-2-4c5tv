@@ -10,7 +10,7 @@
             {% for book in books %}
             <div class="card col-md-2 me-3 mb-3" style="width: 18rem;">
                 {{ clickable_book_card(book, imgs, genres, loop) }}
-                <div class="btn-group align-items-center container-fluid" role="group" style="width:99%;">
+                <div class="btn-group align-items-center container-fluid my-2" role="group" style="width:99%;">
                     {% if current_user.is_authenticated %}
                         {% if current_user.can('update') %}
                             <a class="btn btn-outline-dark" href="{{ url_for('books.edit', book_id=book.id) }}"><i class="bi bi-pencil-square"></i></a>

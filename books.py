@@ -164,8 +164,8 @@ def update(book_id):
     return redirect(url_for('index'))
 
 
-@login_required
 @bp.route('/<int:book_id>/delete', methods=['POST'])
+@login_required
 @check_rights('delete')
 def delete(book_id):
     book = Book.query.filter_by(id=book_id).first()
