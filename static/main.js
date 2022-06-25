@@ -55,6 +55,14 @@ const TOOLBAR_ITEMS = [
     "guide"
 ]
 
+
+var ModalDeleteBook = document.getElementById('modal-del-book'); // подгрузка в экшн модалки для удаления книги 
+ModalDeleteBook.addEventListener('show.bs.modal', function (event) {
+  let form_del = this.querySelector('form');
+  form_del.action = event.relatedTarget.dataset.url;
+})
+
+
 window.onload = function() {
     let background_img_field = document.getElementById('background_img');
     if (background_img_field) {
