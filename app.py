@@ -31,30 +31,19 @@ app.register_blueprint(books_bp)
 
 init_login_manager(app)
 
-from models import BookGenre, Image
+from models import Image
 from tools import BooksFilter
-from books import PER_PAGE, search_params
+from books import PER_PAGE, take_info_for_card_book
 
 @app.route('/')
 def index():
     page = request.args.get('page', 1, type=int)
-    books = BooksFilter(**search_params()).perform()
+    books = BooksFilter().perform()
     pagination = books.paginate(page, PER_PAGE)
     books = pagination.items
-    imgs_arr = []
-    genres_arr = []
-    for book in books:
-        img = Image.query.filter_by(book_id=book.id).first()
-        imgs_arr.append(img.url)
-        genres_quer = BookGenre.query.filter_by(book_id=book.id).all()
-        genres = []
-        for genre in genres_quer:
-            genres.append(genre.genre.name)
-        genres_str = ', '.join(genres)
-        genres_arr.append(genres_str)
-        
-
-    return render_template('books/index.html', books=books, pagination=pagination, search_params=search_params(), imgs=imgs_arr, genres=genres_arr)
+    print('-----------------------------------', books)
+    imgs_arr, genres_arr = take_info_for_card_book(books)
+    return render_template('books/index.html', books=books, pagination=pagination, imgs=imgs_arr, genres=genres_arr)
 
 
 

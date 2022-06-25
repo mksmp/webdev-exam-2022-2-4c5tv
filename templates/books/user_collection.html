@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% from 'books/clickable_book_card.html' import clickable_book_card %}
+{% from 'pagination.html' import render_pagination %}
 
 {% block content %}
 <div class="container">
@@ -12,6 +13,10 @@
           {{ clickable_book_card(book, imgs, genres, loop) }}
         </div>
         {% endfor %}
+    </div>
+    
+    <div class="mb-5">
+      {{ render_pagination(pagination, request.endpoint, params) }}
     </div>
 
 </div>

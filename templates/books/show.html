@@ -2,21 +2,7 @@
 {% from 'feedback.html' import render_feedback_form, render_my_feedback, render_rows_feedback %}
 
 {% block content %}
-<!-- <div class="title-area position-relative" style="background-image: url({# image #});">
-    <div class="h-100 w-100 py-5 d-flex text-center position-absolute" style="background-color: rgba(0, 0, 0, 0.65);">
-        <div class="m-auto">
-            <h1 class="title mb-3 font-weight-bold">{# book.name #}</h1>
-            <p class="mb-3 mx-auto">
-                {# genres #} | <span>★</span> <span>{# "%.2f" | format(book.rating) #}</span>
-            </p>
-            <div class="container">
-                <p class="description w-75 mb-5 mx-auto">
-                    {# book.author #}
-                </p>
-            </div>
-        </div>
-    </div>
-</div> -->
+
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-4 block-img-show mb-2">
@@ -25,10 +11,10 @@
         <div class="col-md-8">
             <h1 class="title mb-3 font-weight-bold">{{ book.name }}</h1>
             <p class="description ms-0 mb-2">
-                <b>Автор</b> {{ book.author }}
+                <b>Автор:</b> {{ book.author }}
             </p>
             <p class="mb-2 mx-auto">
-                <b>Жанры</b> {{ genres }}
+                <b>Жанры:</b> {{ genres }}
             </p>
             <p class="mb-4 mx-auto">
             <h4><span>{{ "%.2f" | format(book.rating) }} ★ | {{ book.rating_num }} {% if book.rating_num == 1 %}отзыв{%
@@ -44,26 +30,28 @@
 </div>
 
 <div class="container mt-5">
+    <!-- <div class="heading-line mx-auto my-5"></div> -->
+    <hr/>
     <section class="about mb-5">
         <h3 class="mb-3 font-weight-bold">О книге</h3>
         <p>{{ book.short_desc | safe }}</p>
         <h3 class="mb-3 font-weight-bold">Подробная информация</h3>
         <p class="list-group-item mb-1"><b>Год:</b> {{ book.year }}</p>
-        <p class="list-group-item mb-1"><b>Объем:</b> {{ book.vol_pages }}</p>
+        <p class="list-group-item mb-1"><b>Объем:</b> {{ book.vol_pages }} страниц</p>
         <p class="list-group-item mb-1"><b>Издатель:</b> {{ book.publisher }}</p>
 
     </section>
 
     {% if current_user.is_authenticated %}
-    {% if user_review %}
-    <div class="mb-5">
-        {{ render_my_feedback(user_review, current_user) }}
-    </div>
-    {% else %}
-    <div class="mb-5">
-        {{ render_feedback_form(book, current_user) }}
-    </div>
-    {% endif %}
+        {% if user_review %}
+        <div class="mb-5">
+            {{ render_my_feedback(user_review, current_user) }}
+        </div>
+        {% elif current_user.is_user %}
+        <div class="mb-5">
+            {{ render_feedback_form(book, current_user) }}
+        </div>
+        {% endif %}
     {% endif %}
 
     <!-- ОТЗЫВЫ -->

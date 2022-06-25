@@ -8,7 +8,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="genre">Жанры</label>
-                    <select class="form-select" name="genre" id="genre" size="6" multiple>
+                    <select class="form-select" name="genre" id="genre" size="8" multiple>
                         {% for genre in genres %}
                             <option value="{{ genre.id }}" {% if genre.id in genres_select %}selected{% endif %}>{{ genre.name }}</option>
                         {% endfor %}
@@ -17,6 +17,10 @@
                 <div class="mb-3">
                     <label for="author">Автор</label>
                     <input type="text" class="form-control" placeholder="Введите ФИО автора" name="author" id="author" value="{{ book.author }}">
+                </div>
+                <div class="mb-3">
+                    <label for="vol_pages">Количество страниц</label>
+                    <input type="text" class="form-control" placeholder="Введите количество страниц" name="vol_pages" id="vol_pages" value="{{ book.vol_pages }}">
                 </div>
             </div>
             <div class="col-md-6 d-flex flex-column">

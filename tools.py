@@ -4,21 +4,16 @@ from models import Book, Image, Review, BookGenre
 import os
 from werkzeug.utils import secure_filename
 from app import db, app
+import markdown
 
 
 class BooksFilter:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self):
         self.query_name = Book.query
 
     def perform(self):
-        self.__filter_by_name()
         return self.query_name.order_by(Book.name.desc())
 
-    def __filter_by_name(self):
-        if self.name:
-            self.query_name = self.query_name.filter(
-                Book.name.ilike('%' + self.name + '%'))
 
 
 class ImageSaver:
@@ -28,7 +23,7 @@ class ImageSaver:
     def save(self, book_id):
         self.img = self.__find_by_md5_hash()
         if self.img is not None:
-            return self.img
+            return None
         file_name = secure_filename(self.file.filename)
         self.img = Image(id=str(uuid.uuid4()), file_name=file_name,
                          mime_type=self.file.mimetype, md5_hash=self.md5_hash)
@@ -56,6 +51,8 @@ class ReviewsFilter:
             reviews = self.__perform_rating_desc()
         elif sort == 'bad':
             reviews = self.__perform_rating_asc()
+        for review in reviews:
+            review.text = markdown.markdown(review.text)
         return reviews
 
     def __perform_date_desc(self):

@@ -24,6 +24,7 @@
                 </div>
                 
             </div>
+            {% endfor %}
             <!-- Modal for delete -->
             <div class="modal" tabindex="-1" id="modal-del-book" aria-labelledby="modal-delete" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
@@ -45,11 +46,10 @@
                 </div>
               </div>
             <!-- ---------------- -->
-            {% endfor %}
         </div>
         
         <div class="mb-5">
-            {{ render_pagination(pagination, request.endpoint, search_params) }}
+            {{ render_pagination(pagination, request.endpoint) }}
         </div>
 
         {% if current_user.is_authenticated and current_user.is_admin %}
