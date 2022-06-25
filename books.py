@@ -163,7 +163,6 @@ def update(book_id):
     book.name = form_dict['name']
     book.author = form_dict['author']
     book.publisher = form_dict['publisher']
-    book.short_desc = form_dict['short_desc']
     # экранирование запрещенных тегов
     book.short_desc = bleach.clean(book.short_desc)
     book.year = form_dict['year']
@@ -191,7 +190,7 @@ def delete(book_id):
     book_name = book.name
     img = Image.query.filter_by(book_id=book_id).first()
     img_path = os.path.join(os.path.dirname(os.path.abspath(
-        __file__)), 'media', 'images') + '\\' + img.storage_filename # удаление картинки из папки media
+        __file__)), 'media', 'images') + '/' + img.storage_filename # удаление картинки из папки media
     db.session.delete(book)
     db.session.commit()
     os.remove(img_path)
