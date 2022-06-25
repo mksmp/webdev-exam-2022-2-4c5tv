@@ -198,8 +198,9 @@ def delete(book_id):
     return redirect(url_for('index'))
 
 
-@bp.route('/<int:book_id>', methods=['POST'])
+@bp.route('/<int:book_id>/send_comment', methods=['POST'])
 @login_required
+@check_rights('check_collections')
 def send_comment(book_id):
     reviews = Review(**comment_params())
     # экранирование запрещенных тегов
