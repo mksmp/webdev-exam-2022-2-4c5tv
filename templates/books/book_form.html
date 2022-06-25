@@ -33,8 +33,8 @@
                     <input type="text" class="form-control" placeholder="Введите год в формате YYYY" name="year" id="year" value="{{ book.year }}">
                 </div>
                 <div class="mb-3 d-flex flex-column flex-grow-1">
-                    <label for="short_description">Краткое описание</label>
-                    <textarea class="form-control flex-grow-1" name="short_desc" id="short_description" cols="30" rows="5">{{ book.short_desc | safe }}</textarea>
+                    <label for="text-content">Краткое описание</label>
+                    <textarea class="form-control flex-grow-1" name="short_desc" id="text-content" cols="30" rows="5">{{ book.short_desc | safe }}</textarea>
                 </div>
             </div>
         </div>
@@ -58,7 +58,7 @@
         </div>
     </form>
     <!-- Скрипт подключения редактора Markdown -->
-    <script>
+    <!-- <script>
         const easyMDE = new EasyMDE({element: document.getElementById('short_description')}); 
-    </script>
+    </script> -->
 {% endmacro %}

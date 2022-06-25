@@ -157,7 +157,7 @@ def edit(book_id):
 @bp.route('/<int:book_id>/update', methods=['POST'])
 @login_required
 @check_rights('update')
-def update(book_id):
+def update(book_id):  
     book = Book.query.filter_by(id=book_id).first()  # апдейт книги
     form_dict = params()
     book.name = form_dict['name']

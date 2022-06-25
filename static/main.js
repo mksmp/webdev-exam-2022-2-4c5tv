@@ -16,13 +16,6 @@ function imagePreviewHandler(event) {
     }
 }
 
-function openLink(event) {
-    let row = event.target.closest('.row');
-    if (row.dataset.url) {
-        window.location = row.dataset.url;
-    }
-}
-
 function imageUploadFunction(file, onSuccess, onError) {
     let xhr = new XMLHttpRequest();
     let formData = new FormData();
@@ -55,24 +48,13 @@ const TOOLBAR_ITEMS = [
     "guide"
 ]
 
-
-var ModalDeleteBook = document.getElementById('modal-del-book'); // подгрузка в экшн модалки для удаления книги 
-ModalDeleteBook.addEventListener('show.bs.modal', function (event) {
-  let form_del = this.querySelector('form');
-  form_del.action = event.relatedTarget.dataset.url;
-})
-
-
 window.onload = function() {
-    let background_img_field = document.getElementById('background_img');
+    var background_img_field = document.getElementById('background_img');
     if (background_img_field) {
         background_img_field.onchange = imagePreviewHandler;
     }
-    for (let course_elm of document.querySelectorAll('.courses-list .row')) {
-        course_elm.onclick = openLink;
-    }
     if (document.getElementById('text-content')) {
-        let easyMDE = new EasyMDE({
+        var easyMDE = new EasyMDE({
             element: document.getElementById('text-content'),
             toolbar: TOOLBAR_ITEMS,
             uploadImage: true,
@@ -80,4 +62,10 @@ window.onload = function() {
             imageUploadFunction: imageUploadFunction
         });
     }
+    if (document.getElementById('modal-del-book')) {
+        document.getElementById('modal-del-book').addEventListener('show.bs.modal', function (event) {
+        let formDel = this.querySelector('form');
+        formDel.action = event.relatedTarget.dataset.url;
+        })
+    } // подгрузка в экшн модалки для удаления книги 
 }
