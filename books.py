@@ -184,6 +184,7 @@ def update(book_id):
     # экранирование запрещенных тегов
     book.short_desc = bleach.clean(book.short_desc)
     book.year = form_dict['year']
+    book.vol_pages = form_dict['vol_pages']
 
     # удаление старых жанров для данной книги
     genres_old = BookGenre.query.filter_by(book_id=book_id).all()
@@ -197,6 +198,7 @@ def update(book_id):
         db.session.add(book_genre)
 
     db.session.commit()
+    flash(f'Вы успешно отредактировали книгу {book.name}!', 'success')
     return redirect(url_for('index'))
 
 
