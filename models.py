@@ -100,7 +100,7 @@ class Image(db.Model):
 
 
     def __repr__(self):
-        return '<Book %r>' % self.file_name
+        return '<Image %r>' % self.file_name
 
     @property
     def storage_filename(self):

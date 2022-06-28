@@ -3,8 +3,8 @@
 
 {% block content %}
     <div class="container">
-        <h2 class="my-3 text-center text-uppercase font-weight-bold">Создание курса</h2>
-        {{ render_book_form(url_for('books.create'), genres) }}
+        <h2 class="my-3 text-center text-uppercase font-weight-bold">Добавление книги</h2>
+        {{ render_book_form(url_for('books.create'), genres, form, genres_select) }}
         
     </div>
 {% endblock %}

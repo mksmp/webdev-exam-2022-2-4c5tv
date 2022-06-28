@@ -41,7 +41,7 @@ def index():
     books = BooksFilter().perform()
     pagination = books.paginate(page, PER_PAGE)
     books = pagination.items
-    print('-----------------------------------', books)
+    # print('-----------------------------------', books)
     imgs_arr, genres_arr = take_info_for_card_book(books)
     return render_template('books/index.html', books=books, pagination=pagination, imgs=imgs_arr, genres=genres_arr)
 

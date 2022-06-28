@@ -65,7 +65,7 @@ def add_genre_to_book(book_id, genre_id):
 @login_required
 def new():
     genres = Genre.query.all()
-    return render_template('books/new.html', genres=genres)
+    return render_template('books/new.html', genres=genres, form={}, genres_select=[])
 
 
 @bp.route('/create', methods=['POST'])
@@ -80,8 +80,12 @@ def create():
         db.session.commit()
     except:
         db.session.rollback()
+        genres = Genre.query.all()
+        genres_select = request.form.getlist('genre')
+        for i in range(len(genres_select)):
+            genres_select[i] = int(genres_select[i])
         flash('При сохранении книги произошла ошибка. Проверьте введённые данные.', 'danger')
-        return redirect(url_for('books.new'))
+        return render_template('books/new.html', genres=genres, form=params(), genres_select=genres_select)
 
     f = request.files.get('background_img')
     if f and f.filename:
@@ -89,8 +93,22 @@ def create():
         if img == None:
             db.session.delete(book)
             db.session.commit()
+            genres = Genre.query.all()
+            genres_select = request.form.getlist('genre')
+            for i in range(len(genres_select)):
+                genres_select[i] = int(genres_select[i])
             flash('Нельзя использовать книгу с обложкой, которая уже имеется!', 'danger')
-            return redirect(url_for('books.new'))
+            return render_template('books/new.html', genres=genres, form=params(), genres_select=genres_select)
+    else:
+        db.session.delete(book)
+        db.session.commit()
+        genres = Genre.query.all()
+        genres_select = request.form.getlist('genre')
+        for i in range(len(genres_select)):
+            genres_select[i] = int(genres_select[i])
+        flash('Книга не может быть без обложки. Загрузите обложку!', 'danger')
+        return render_template('books/new.html', genres=genres, form=params(), genres_select=genres_select)
+    
     # добавление выбранных жанров из multiple списком id
     genres_arr = request.form.getlist('genre')
     for genres in genres_arr:
@@ -151,7 +169,7 @@ def edit(book_id):
     for genre in genres_quer:
         genres_select.append(genre.genre.id)
 
-    return render_template('books/edit.html', genres=genres, genres_select=genres_select, book=book)
+    return render_template('books/edit.html', genres=genres, form={}, genres_select=genres_select, book=book)
 
 
 @bp.route('/<int:book_id>/update', methods=['POST'])

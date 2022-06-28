@@ -1,10 +1,10 @@
-{% macro render_book_form(url, genres, genres_select=[], book={}) %}
+{% macro render_book_form(url, genres, form, genres_select=[], book={}) %}
     <form method="POST" action="{{ url }}" enctype="multipart/form-data">
         <div class="mb-3 row">
             <div class="col-md-6 d-flex flex-column">
                 <div class="mb-3">
                     <label for="name">Название</label>
-                    <input class="form-control" type="text" name="name" id="name" value="{{ book.name }}">
+                    <input class="form-control" type="text" name="name" placeholder="Введите название книги" id="name" value="{% if form == {} %}{{ book.name }}{% else %}{{ form['name'] }}{% endif %}">
                 </div>
                 <div class="mb-3">
                     <label for="genre">Жанры</label>
@@ -16,25 +16,25 @@
                 </div>
                 <div class="mb-3">
                     <label for="author">Автор</label>
-                    <input type="text" class="form-control" placeholder="Введите ФИО автора" name="author" id="author" value="{{ book.author }}">
+                    <input type="text" class="form-control" placeholder="Введите ФИО автора" name="author" id="author" value="{% if form == {} %}{{ book.author }}{% else %}{{ form['author'] }}{% endif %}">
                 </div>
                 <div class="mb-3">
                     <label for="vol_pages">Количество страниц</label>
-                    <input type="text" class="form-control" placeholder="Введите количество страниц" name="vol_pages" id="vol_pages" value="{{ book.vol_pages }}">
+                    <input type="text" class="form-control" placeholder="Введите количество страниц" name="vol_pages" id="vol_pages" value="{% if form == {} %}{{ book.vol_pages }}{% else %}{{ form['vol_pages'] }}{% endif %}">
                 </div>
             </div>
             <div class="col-md-6 d-flex flex-column">
                 <div class="mb-3">
                     <label for="publisher">Издательство</label>
-                    <input type="text" class="form-control" placeholder="Введите издательство" name="publisher" id="publisher" value="{{ book.publisher }}">
+                    <input type="text" class="form-control" placeholder="Введите издательство" name="publisher" id="publisher" value="{% if form == {} %}{{ book.publisher }}{% else %}{{ form['publisher'] }}{% endif %}">
                 </div>
                 <div class="mb-3">
                     <label for="year">Год выпуска</label>
-                    <input type="text" class="form-control" placeholder="Введите год в формате YYYY" name="year" id="year" value="{{ book.year }}">
+                    <input type="text" class="form-control" placeholder="Введите год в формате YYYY" name="year" id="year" value="{% if form == {} %}{{ book.year }}{% else %}{{ form['year'] }}{% endif %}">
                 </div>
                 <div class="mb-3 d-flex flex-column flex-grow-1">
                     <label for="text-content">Краткое описание</label>
-                    <textarea class="form-control flex-grow-1" name="short_desc" id="text-content" cols="30" rows="5">{{ book.short_desc | safe }}</textarea>
+                    <textarea class="form-control flex-grow-1" name="short_desc" id="text-content" cols="30" rows="5">{% if form == {} %}{{ book.short_desc | safe }}{% else %}{{ form['short_desc'] }}{% endif %}</textarea>
                 </div>
             </div>
         </div>
